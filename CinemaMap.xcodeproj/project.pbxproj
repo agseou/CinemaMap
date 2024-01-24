@@ -15,6 +15,7 @@
 		A01D3BF42B558DF200C1AC43 /* Theater.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01D3BF32B558DF200C1AC43 /* Theater.swift */; };
 		A01D3BF82B558E9700C1AC43 /* CinemaMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01D3BF62B558E9700C1AC43 /* CinemaMapViewController.swift */; };
 		A01D3BFB2B558ECD00C1AC43 /* CinemaMap.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A01D3BFA2B558ECD00C1AC43 /* CinemaMap.storyboard */; };
+		A05351962B60F9DE0032FED0 /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05351952B60F9DE0032FED0 /* UIViewController+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		A01D3BF32B558DF200C1AC43 /* Theater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theater.swift; sourceTree = "<group>"; };
 		A01D3BF62B558E9700C1AC43 /* CinemaMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CinemaMapViewController.swift; sourceTree = "<group>"; };
 		A01D3BFA2B558ECD00C1AC43 /* CinemaMap.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = CinemaMap.storyboard; sourceTree = "<group>"; };
+		A05351952B60F9DE0032FED0 /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 		A01D3BDB2B558CBA00C1AC43 /* CinemaMap */ = {
 			isa = PBXGroup;
 			children = (
+				A05351942B60F9C00032FED0 /* Extension */,
 				A01D3BF52B558E4900C1AC43 /* CinemaMap */,
 				A01D3BF02B558DB800C1AC43 /* Model */,
 				A01D3BDC2B558CBA00C1AC43 /* AppDelegate.swift */,
@@ -87,6 +90,14 @@
 				A01D3BFA2B558ECD00C1AC43 /* CinemaMap.storyboard */,
 			);
 			path = CinemaMap;
+			sourceTree = "<group>";
+		};
+		A05351942B60F9C00032FED0 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				A05351952B60F9DE0032FED0 /* UIViewController+Extension.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -160,6 +171,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A05351962B60F9DE0032FED0 /* UIViewController+Extension.swift in Sources */,
 				A01D3BF22B558DC400C1AC43 /* TheaterList.swift in Sources */,
 				A01D3BF82B558E9700C1AC43 /* CinemaMapViewController.swift in Sources */,
 				A01D3BF42B558DF200C1AC43 /* Theater.swift in Sources */,
