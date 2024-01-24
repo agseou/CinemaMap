@@ -6,53 +6,75 @@
 //
 
 import UIKit
+import CoreLocation
 import MapKit
 
 class CinemaMapViewController: UIViewController {
-
+    // MARK: - PROPERTIES
+    
     @IBOutlet var mapView: MKMapView!
-    let theaterList = TheaterList.mapAnnotations
-    var latitudeAVG: Double = 0
-    var logitudeAVG: Double = 0
+    let theaterList: [Theater] = TheaterList.mapAnnotations
+    lazy var filterList: [Theater] = theaterList
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        mapAnnotation()
-        CalculateLocation()
-        
-        let coordinate = CLLocationCoordinate2D(latitude: latitudeAVG, longitude: logitudeAVG)
-        
-        let regions = MKCoordinateRegion(center: coordinate, latitudinalMeters: 12000, longitudinalMeters: 12000)
-        
-        mapView.setRegion(regions, animated: true)
-        
-        let rightButton = UIBarButtonItem(title: "filter", style: .plain, target: self, action: #selector(tapRightBtn))
-                    
+        configureView()
+        setMapAnotation()
+       
+    }
+    
+    // MARK: - FUNCTIONS
+    func configureView() {
+        let rightButton = UIBarButtonItem(title: "filter",
+                                          style: .plain,
+                                          target: self,
+                                          action: #selector(tapRightBtn))
         navigationItem.rightBarButtonItem = rightButton
-        
     }
     
-    func CalculateLocation(){
-        
-        for i in theaterList {
-            latitudeAVG += i.latitude
-            logitudeAVG += i.longitude
-        }
-        
-        latitudeAVG /= Double(theaterList.count)
-        logitudeAVG /= Double(theaterList.count)
-    }
-    
-    func mapAnnotation(){
-        for item in theaterList {
-            let coordinate = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
-            
+    func setMapAnotation() {
+        for item in filterList {
             let annotation = MKPointAnnotation()
-            annotation.coordinate = coordinate
+            annotation.coordinate = CLLocationCoordinate2D(latitude: item.latitude,
+                                                           longitude: item.longitude)
             annotation.title = "\(item.location)"
             mapView.addAnnotation(annotation)
         }
+        setLocation(list: filterList)
+    }
+    
+    func setLocation(list: [Theater]){
+        var latitudeAVG: CLLocationDegrees = 0
+        var longitudeAVG: CLLocationDegrees = 0
+        var maxLatitude: CLLocationDegrees = list[0].latitude
+        var minLatitude: CLLocationDegrees = list[0].latitude
+        var maxLongitude: CLLocationDegrees = list[0].longitude
+        var minLongitude: CLLocationDegrees = list[0].longitude
+        
+        for item in list {
+            latitudeAVG += item.latitude
+            longitudeAVG += item.longitude
+            if maxLatitude < item.latitude {
+                maxLatitude = item.latitude
+            } else if minLatitude > item.latitude {
+                minLatitude = item.latitude
+            }
+            if maxLongitude < item.longitude {
+                maxLongitude = item.longitude
+            } else if minLongitude > item.longitude {
+                minLongitude = item.longitude
+            }
+        }
+        latitudeAVG /= Double(list.count)
+        longitudeAVG /= Double(list.count)
+        
+        let coordinate = CLLocationCoordinate2D(latitude: latitudeAVG,
+                                                longitude: longitudeAVG)
+        let span = MKCoordinateSpan(latitudeDelta: maxLatitude - minLatitude + 0.01,
+                                    longitudeDelta: maxLongitude - minLongitude + 0.01)
+        let regions = MKCoordinateRegion(center: coordinate, span: span)
+        
+        mapView.setRegion(regions, animated: true)
     }
     
     
@@ -60,17 +82,31 @@ class CinemaMapViewController: UIViewController {
     func tapRightBtn(){
         
         showActionSheet(title: nil, message: nil) { actionSheet in
-            let Btn1 = UIAlertAction(title: "메가박스", style: .default) { UIAlertAction in
-                self.mapAnotation(data: CinemaType.메가박스.rawValue)
+            let Btn1 = UIAlertAction(title: CinemaType.메가박스.rawValue, style: .default) { UIAlertAction in
+                self.mapView.removeAnnotations(self.mapView.annotations)
+                self.filterList = self.theaterList.filter({ list in
+                    return list.type == .메가박스
+                })
+                self.setMapAnotation()
             }
-            let Btn2 = UIAlertAction(title: "롯데시네마", style: .default) { UIAlertAction in
-                self.mapAnotation(data: CinemaType.롯데시네마.rawValue)
+            let Btn2 = UIAlertAction(title: CinemaType.롯데시네마.rawValue, style: .default) { UIAlertAction in
+                self.mapView.removeAnnotations(self.mapView.annotations)
+                self.filterList = self.theaterList.filter({ list in
+                    return list.type == .롯데시네마
+                })
+                self.setMapAnotation()
             }
-            let Btn3 = UIAlertAction(title: "CGV", style: .default) { UIAlertAction in
-                self.mapAnotation(data: CinemaType.CGV.rawValue)
+            let Btn3 = UIAlertAction(title: CinemaType.CGV.rawValue, style: .default) { UIAlertAction in
+                self.mapView.removeAnnotations(self.mapView.annotations)
+                self.filterList = self.theaterList.filter({ list in
+                    return list.type == .CGV
+                })
+                self.setMapAnotation()
             }
-            let Btn4 = UIAlertAction(title: "전체보기", style: .default){ UIAlertAction in
-                self.mapAnotation(data: CinemaType.ALL.rawValue)
+            let Btn4 = UIAlertAction(title: CinemaType.전체보기.rawValue, style: .default){ UIAlertAction in
+                self.mapView.removeAnnotations(self.mapView.annotations)
+                self.filterList = self.theaterList
+                self.setMapAnotation()
             }
             let Btn5 = UIAlertAction(title: "취소", style: .cancel)
             
@@ -81,34 +117,26 @@ class CinemaMapViewController: UIViewController {
             actionSheet.addAction(Btn5)
         }
     }
-    
-    
-    func mapAnotation(data: String){
-        var filterData: [Theater] = []
-        
-        for item in theaterList {
-            if item.type.rawValue == data {
-                filterData.append(item)
-            }
-        }
-        if data == CinemaType.ALL.rawValue {
-            filterData = theaterList
-        }
-        
-        latitudeAVG = 0
-        logitudeAVG = 0
-        for item in filterData {
-            latitudeAVG += item.latitude
-            logitudeAVG += item.longitude
-        }
-        latitudeAVG /= Double(filterData.count)
-        logitudeAVG /= Double(filterData.count)
-        
-        let coordinate = CLLocationCoordinate2D(latitude: latitudeAVG, longitude: latitudeAVG)
-            
-        let regions = MKCoordinateRegion(center: coordinate, latitudinalMeters: 10000, longitudinalMeters: 10000)
-            
-        mapView.setRegion(regions, animated: true)
-    }
 
+}
+
+// MARK: - 위치 프로토콜
+extension CinemaMapViewController: CLLocationManagerDelegate {
+    
+    // 사용자의 위치를 가져오기 -> [성공]
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+    }
+    
+    // 사용자의 위치를 가져오기 -> [실패]
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(#function)
+    }
+    
+    // 사용자 권한 상태가 바뀔 때를 알려줌
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        print(#function)
+        
+    }
+    
 }

@@ -8,10 +8,10 @@
 import Foundation
 
 enum CinemaType: String {
-    case 롯데시네마 = "롯데시네마"
-    case 메가박스 = "메가박스"
-    case CGV = "CGV"
-    case ALL = "전체보기"
+    case 롯데시네마
+    case 메가박스
+    case CGV
+    case 전체보기
 }
 
 
