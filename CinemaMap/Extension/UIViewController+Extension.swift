@@ -9,6 +9,7 @@ import UIKit
 import CoreLocation
 
 extension UIViewController {
+    
     // Alert 생성 함수
     func showAlert(title: String?, message: String?, buttonTitle: String?, completionHandler: @escaping () -> Void) {
         let alert = UIAlertController(title: title,
@@ -59,19 +60,27 @@ extension UIViewController {
     
     // "현재" 기기의 위치 권한을 확인하기
     func checkCurrentLocationAuthorization(status: CLAuthorizationStatus) {
+        let locationManager = CLLocationManager()
+        
         switch status {
+            // 권한 허용에 접근 안함
         case .notDetermined:
-            print("")
-        case .restricted:
-            print("")
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.requestWhenInUseAuthorization()
         case .denied:
-            print("")
+            showAlert(title: "위치정보이용", message: "위치 서비스를 사용할 수 없습니다. 기기의 '설정> 개인정보보호'에서 위치서비스를 켜주세요", buttonTitle: "설정으로 이동") {
+                if let setting = URL(string: UIApplication.openSettingsURLString){
+                    UIApplication.shared.open(setting)
+                } else {
+                    print("설정으로 가주세요")
+                }
+            }
         case .authorizedAlways:
             print("")
         case .authorizedWhenInUse:
             print("")
         default :
-            print("")
+            print("error")
         }
     }
        

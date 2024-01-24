@@ -15,12 +15,15 @@ class CinemaMapViewController: UIViewController {
     @IBOutlet var mapView: MKMapView!
     let theaterList: [Theater] = TheaterList.mapAnnotations
     lazy var filterList: [Theater] = theaterList
+    let locationManager = CLLocationManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
         setMapAnotation()
-       
+        
+        locationManager.delegate = self
+        checkDeviceLocationAuthorization()
     }
     
     // MARK: - FUNCTIONS
@@ -117,7 +120,7 @@ class CinemaMapViewController: UIViewController {
             actionSheet.addAction(Btn5)
         }
     }
-
+    
 }
 
 // MARK: - 위치 프로토콜
@@ -125,17 +128,32 @@ extension CinemaMapViewController: CLLocationManagerDelegate {
     
     // 사용자의 위치를 가져오기 -> [성공]
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print(locations)
         
+        if let coordinate = locations.last?.coordinate {
+            print(coordinate.latitude)
+            print(coordinate.longitude)
+            setRegionAndAnnotation(center: coordinate)
+        }
+        locationManager.stopUpdatingLocation()
+    }
+    
+    func setRegionAndAnnotation(center: CLLocationCoordinate2D) {
+        // 지도 중심 기반으로 보여질 범위 설정
+        let region = MKCoordinateRegion(center: center, latitudinalMeters:400, longitudinalMeters: 400)
+        mapView.setRegion(region, animated: true)
     }
     
     // 사용자의 위치를 가져오기 -> [실패]
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print(#function)
+        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 37.654370, longitude: 127.049948), latitudinalMeters:400, longitudinalMeters: 400)
+        mapView.setRegion(region, animated: true)
     }
     
     // 사용자 권한 상태가 바뀔 때를 알려줌
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         print(#function)
+        checkDeviceLocationAuthorization()
         
     }
     
