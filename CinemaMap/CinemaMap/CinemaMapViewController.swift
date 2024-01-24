@@ -21,7 +21,6 @@ class CinemaMapViewController: UIViewController {
         super.viewDidLoad()
         configureView()
         setMapAnotation()
-        
         locationManager.delegate = self
         checkDeviceLocationAuthorization()
     }
@@ -43,7 +42,6 @@ class CinemaMapViewController: UIViewController {
             annotation.title = "\(item.location)"
             mapView.addAnnotation(annotation)
         }
-        setLocation(list: filterList)
     }
     
     func setLocation(list: [Theater]){
@@ -85,19 +83,21 @@ class CinemaMapViewController: UIViewController {
     func tapRightBtn(){
         
         showActionSheet(title: nil, message: nil) { actionSheet in
-            let Btn1 = UIAlertAction(title: CinemaType.메가박스.rawValue, style: .default) { UIAlertAction in
+            let Btn1 = UIAlertAction(title: CinemaType.메가박스.rawValue, style: .default) { [self] UIAlertAction in
                 self.mapView.removeAnnotations(self.mapView.annotations)
                 self.filterList = self.theaterList.filter({ list in
                     return list.type == .메가박스
                 })
                 self.setMapAnotation()
+                self.setLocation(list: filterList)
             }
-            let Btn2 = UIAlertAction(title: CinemaType.롯데시네마.rawValue, style: .default) { UIAlertAction in
+            let Btn2 = UIAlertAction(title: CinemaType.롯데시네마.rawValue, style: .default) { [self] UIAlertAction in
                 self.mapView.removeAnnotations(self.mapView.annotations)
                 self.filterList = self.theaterList.filter({ list in
                     return list.type == .롯데시네마
                 })
                 self.setMapAnotation()
+                self.setLocation(list: filterList)
             }
             let Btn3 = UIAlertAction(title: CinemaType.CGV.rawValue, style: .default) { UIAlertAction in
                 self.mapView.removeAnnotations(self.mapView.annotations)
@@ -105,11 +105,13 @@ class CinemaMapViewController: UIViewController {
                     return list.type == .CGV
                 })
                 self.setMapAnotation()
+                self.setLocation(list: self.filterList)
             }
             let Btn4 = UIAlertAction(title: CinemaType.전체보기.rawValue, style: .default){ UIAlertAction in
                 self.mapView.removeAnnotations(self.mapView.annotations)
                 self.filterList = self.theaterList
                 self.setMapAnotation()
+                self.setLocation(list: self.filterList)
             }
             let Btn5 = UIAlertAction(title: "취소", style: .cancel)
             
@@ -121,6 +123,57 @@ class CinemaMapViewController: UIViewController {
         }
     }
     
+}
+
+extension CinemaMapViewController {
+    
+    // 기기의 위치 권한을 확인하기
+    func checkDeviceLocationAuthorization() {
+        DispatchQueue.global().async {
+            if CLLocationManager.locationServicesEnabled() {
+                //현재 사용자의 위치 권한 상태 확인
+                let authorization: CLAuthorizationStatus
+                if #available(iOS 14.0, *) { //iOS 14 이상부터
+                    authorization = self.locationManager.authorizationStatus
+                } else {
+                    authorization = CLLocationManager.authorizationStatus()
+                }
+                DispatchQueue.main.async {
+                    self.checkCurrentLocationAuthorization(status: authorization)
+                }
+            } else {
+                print("위치 서비스가 꺼져 있어서, 위치 권한 요청을 할 수 없어요.")
+            }
+        }
+    }
+    
+    // "현재" 기기의 위치 권한을 확인하기
+    func checkCurrentLocationAuthorization(status: CLAuthorizationStatus) {
+        
+        switch status {
+            // 권한 허용에 접근 안함
+        case .notDetermined:
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.requestWhenInUseAuthorization()
+        case .denied:
+            // 새싹 도봉캠으로 이동!
+            self.locationManager.startUpdatingLocation()
+            showAlert(title: "위치정보이용", message: "위치 서비스를 사용할 수 없습니다. 기기의 '설정> 개인정보보호'에서 위치서비스를 켜주세요", buttonTitle: "설정으로 이동") {
+                if let setting = URL(string: UIApplication.openSettingsURLString){
+                    UIApplication.shared.open(setting)
+                } else {
+                    print("설정으로 가주세요")
+                }
+            }
+        case .authorizedAlways:
+            locationManager.startUpdatingLocation()
+        case .authorizedWhenInUse:
+            locationManager.startUpdatingLocation()
+        default :
+            print("error")
+        }
+    }
+       
 }
 
 // MARK: - 위치 프로토콜
@@ -146,8 +199,8 @@ extension CinemaMapViewController: CLLocationManagerDelegate {
     
     // 사용자의 위치를 가져오기 -> [실패]
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 37.654370, longitude: 127.049948), latitudinalMeters:400, longitudinalMeters: 400)
-        mapView.setRegion(region, animated: true)
+        print("실패")
+        setRegionAndAnnotation(center: CLLocationCoordinate2D(latitude: 37.654370, longitude: 127.049948))
     }
     
     // 사용자 권한 상태가 바뀔 때를 알려줌
