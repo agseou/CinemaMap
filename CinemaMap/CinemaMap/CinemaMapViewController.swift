@@ -27,6 +27,11 @@ class CinemaMapViewController: UIViewController {
     
     // MARK: - FUNCTIONS
     func configureView() {
+        let leftButton = UIBarButtonItem(title: "위치",
+                                          style: .plain,
+                                          target: self,
+                                          action: #selector(tapLeftBtn))
+        navigationItem.leftBarButtonItem = leftButton
         let rightButton = UIBarButtonItem(title: "filter",
                                           style: .plain,
                                           target: self,
@@ -78,9 +83,11 @@ class CinemaMapViewController: UIViewController {
         mapView.setRegion(regions, animated: true)
     }
     
+    @objc func tapLeftBtn() {
+        checkDeviceLocationAuthorization()
+    }
     
-    @objc
-    func tapRightBtn(){
+    @objc func tapRightBtn() {
         
         showActionSheet(title: nil, message: nil) { actionSheet in
             let Btn1 = UIAlertAction(title: CinemaType.메가박스.rawValue, style: .default) { [self] UIAlertAction in
